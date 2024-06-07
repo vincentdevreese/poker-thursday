@@ -1,2 +1,2 @@
 # poker-thursday
-project
+https://miro.com/app/board/uXjVK-LZYkw=/
