@@ -34,10 +34,14 @@ public class DebtRegister
         this.ExistingDebts = toto.Concat([new(debt.Debtor, debt.Creditor, totalAmount)]).ToList();
     }
 
-    public void Pay(string debtor, string creditor, decimal @decimal)
+    public void Pay(Debt debt)
     {
-        if (debtor == "debtor1")
-            return 10;
-        return 0;
+        var found = ExistingDebts.SingleOrDefault(x => x.Debtor == debt.Debtor && x.Creditor == debt.Creditor);
+
+        if (found is not null)
+        {
+            found = found with { Amount = found.Amount - debt.Amount };
+            ExistingDebts = [found];
+        }
     }
 }

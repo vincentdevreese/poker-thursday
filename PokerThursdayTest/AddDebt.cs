@@ -9,8 +9,9 @@ public class AddDebt
         this.inMemoryDebtRegister = inMemoryDebtRegister;
     }
 
-    public void Act(DebtRegister debtRegister, Debt debt)
+    public void Act(Debt debt)
     {
+        var debtRegister = this.inMemoryDebtRegister.Get();
         debtRegister.Act(debt);
         this.inMemoryDebtRegister.Save(debtRegister);
     }

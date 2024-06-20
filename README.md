@@ -1,7 +1,7 @@
 # poker-thursday
 https://miro.com/app/board/uXjVK-LZYkw=/
 
-WIP : Partially pay a debt
+WIP : Expose UC behind API
 
 // mob commands
 mob s -> start

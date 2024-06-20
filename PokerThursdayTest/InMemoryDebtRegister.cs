@@ -1,4 +1,5 @@
 ﻿
+
 namespace PokerThursdayTest
 {
     public class InMemoryDebtRegister : IInMemoryDebtRegister
@@ -10,7 +11,12 @@ namespace PokerThursdayTest
             this.register = register;
         }
 
-        internal DebtRegister Get()
+        internal void Feed(DebtRegister register)
+        {
+            this.register = register;
+        }
+
+        public DebtRegister Get()
         {
             return register;
         }

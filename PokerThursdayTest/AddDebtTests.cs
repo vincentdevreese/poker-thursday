@@ -19,14 +19,15 @@ public class AddDebtTests
     [Fact]
     public void ActShouldRegisterDebtInRegistry()
     {
+        this.inMemoryDebtRegister.Feed(new DebtRegister([]));
+        
         string debtor = "user1";
         string creditor = "creditor";
 
-        this.sut.Act(new DebtRegister([]), new Debt(debtor, creditor, 30.0m));
+        this.Verify(new Debt(debtor, creditor, 30.0m),
+            new Debt(debtor, creditor, 30.0m)
+        );
 
-        DebtRegister actual = inMemoryDebtRegister.Get();
-
-        actual.ExistingDebts.Should().Equal(new Debt(debtor, creditor, 30.0m));
     }
 
     [Fact]
@@ -34,14 +35,13 @@ public class AddDebtTests
     {
         var existingDebts = new List<Debt>();
         existingDebts.Add(new Debt("des trucs", "bidon", 50m));
+        
+        this.inMemoryDebtRegister.Feed(new DebtRegister(existingDebts));
 
         string debtor = "vincent";
         string creditor = "dimitri";
-        sut.Act(new DebtRegister(existingDebts), new Debt(debtor, creditor, 120.0m));
 
-        DebtRegister actual = inMemoryDebtRegister.Get();
-
-        actual.ExistingDebts.Should().Equal(
+        this.Verify(new Debt(debtor, creditor, 120.0m),
             new Debt("des trucs", "bidon", 50m),
             new Debt(debtor, creditor, 120.0m)
         );
@@ -52,11 +52,17 @@ public class AddDebtTests
     {
         var existingDebts = new List<Debt>();
         existingDebts.Add(new("vincent", "dimitri", 30m));
+        this.inMemoryDebtRegister.Feed(new DebtRegister(existingDebts));
 
-        sut.Act(new DebtRegister(existingDebts), new Debt("vincent", "dimitri", 120.0m));
+        this.Verify(new Debt("vincent", "dimitri", 120.0m), new Debt("vincent", "dimitri", 150m));
+    }
 
-        DebtRegister actual = inMemoryDebtRegister.Get();
+    private void Verify(Debt debt, params Debt[] expected)
+    {
+        this.sut.Act(debt);
 
-        actual.ExistingDebts.Should().Equal(new Debt("vincent", "dimitri", 150m));
+        DebtRegister actual = this.inMemoryDebtRegister.Get();
+
+        actual.ExistingDebts.Should().Equal(expected);
     }
 }
