@@ -40,8 +40,14 @@ public class DebtRegister
 
         if (found is not null)
         {
-            found = found with { Amount = found.Amount - debt.Amount };
-            ExistingDebts = [found];
+            if (found.Amount - debt.Amount < 0)
+                throw new PayDebtAmountOverException();
+            ExistingDebts.Remove(found);
+            if (found.Amount - debt.Amount != 0)
+            {
+                found = found with { Amount = found.Amount - debt.Amount };
+                ExistingDebts.Add(found);
+            }
         }
     }
 }

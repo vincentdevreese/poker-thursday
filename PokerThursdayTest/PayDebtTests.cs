@@ -2,7 +2,6 @@ using FluentAssertions;
 
 namespace PokerThursdayTest;
 
-// TODO: partially pay
 public class PayDebtTests
 {
     private InMemoryDebtRegister inMemoryDebtRegister = new();
@@ -14,54 +13,47 @@ public class PayDebtTests
         sut = new(inMemoryDebtRegister);
     }
 
-    [Fact]
-    public void PayShouldDoNothingWhenNoDebtExistsForDebtorAndCreditor()
+    [Theory]
+    [InlineData("vincent", "dimitri", "vincent", "daniel")]
+    [InlineData("vincent", "dimitri", "daniel", "dimitri")]
+    public void PayShouldDoNothingWhenNoDebtExistsForDebtorAndCreditor(string existingDebtor, string existingCreditor,
+        string targetDebtor, string targetCreditor)
     {
-        var register = new DebtRegister([]);
+        var register = new DebtRegister([new Debt(existingDebtor, existingCreditor, 10)]);
 
         inMemoryDebtRegister.Feed(register);
 
-        Verify(new Debt("debtor1", "creditor", 10.0m), []);
+        Verify(new Debt(targetDebtor, targetCreditor, 10.0m), [new Debt(existingDebtor, existingCreditor, 10)]);
     }
 
     [Fact]
-    public void PayShouldEraseDebtFromDebtRegister2()
+    public void PayShouldEraseDebtFromDebtRegister()
     {
         var register = new DebtRegister([new("debtor1", "creditor", 80m)]);
 
         inMemoryDebtRegister.Feed(register);
 
-        Verify(new("debtor1", "creditor", 70m), new Debt("debtor1", "creditor", 10.0m));
+        Verify(new("debtor1", "creditor", 80m), []);
     }
 
     [Fact]
-    public void PayShouldEraseDebtFromDebtRegister3()
+    public void PayShouldUpdateDebtFromDebtRegister()
     {
         var register = new DebtRegister([new("debtor1", "creditor", 80m)]);
 
         inMemoryDebtRegister.Feed(register);
 
-        Verify(new("debtor1", "creditor", 60m), new Debt("debtor1", "creditor", 20.0m));
+        Verify(new("debtor1", "creditor", 60m), [new Debt("debtor1", "creditor", 20.0m)]);
     }
 
     [Fact]
-    public void PayShouldEraseDebtFromDebtRegister4()
+    public void PayShouldFailWhenAmountIsOverDebt()
     {
-        var register = new DebtRegister([new("debtor1", "creditor", 80m), new("debtor2", "creditor", 30m)]);
+        var register = new DebtRegister([new("debtor1", "creditor", 80m)]);
 
         inMemoryDebtRegister.Feed(register);
 
-        Verify(new("debtor1", "creditor", 60m), new Debt("debtor1", "creditor", 20.0m));
-    }
-
-    [Fact]
-    public void PayShouldEraseDebtFromDebtRegister5()
-    {
-        var register = new DebtRegister([new("debtor1", "creditor", 80m), new("debtor1", "creditor1", 30m)]);
-
-        inMemoryDebtRegister.Feed(register);
-
-        Verify(new("debtor1", "creditor", 60m), new Debt("debtor1", "creditor", 20.0m));
+        this.Invoking(s => s.Verify(new("debtor1", "creditor", 90m), [])).Should().Throw<PayDebtAmountOverException>();
     }
 
     private void Verify(Debt debt, params Debt[] expected)
