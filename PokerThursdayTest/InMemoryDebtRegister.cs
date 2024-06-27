@@ -4,21 +4,21 @@ namespace PokerThursdayTest
 {
     public class InMemoryDebtRegister : IInMemoryDebtRegister
     {
-        private DebtRegister register;
+        private DebtRegisterSnapshot snapshot;
 
         public void Save(DebtRegister register)
         {
-            this.register = register;
+            this.snapshot = register.ToSnapshot();
         }
 
         internal void Feed(DebtRegister register)
         {
-            this.register = register;
+            this.snapshot = register.ToSnapshot();
         }
 
         public DebtRegister Get()
         {
-            return register;
+            return DebtRegister.From(this.snapshot);
         }
     }
 }

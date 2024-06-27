@@ -2,6 +2,9 @@ using FluentAssertions;
 
 namespace PokerThursdayTest;
 
+// StrykerMutator
+// AutoFixture
+// Builder
 public class PayDebtTests
 {
     private InMemoryDebtRegister inMemoryDebtRegister = new();
@@ -23,7 +26,7 @@ public class PayDebtTests
 
         inMemoryDebtRegister.Feed(register);
 
-        Verify(new Debt(targetDebtor, targetCreditor, 10.0m), [new Debt(existingDebtor, existingCreditor, 10)]);
+        Verify(new Debt(targetDebtor, targetCreditor, 10.0m), register.ToSnapshot());
     }
 
     [Fact]
@@ -33,7 +36,7 @@ public class PayDebtTests
 
         inMemoryDebtRegister.Feed(register);
 
-        Verify(new("debtor1", "creditor", 80m), []);
+        Verify(new("debtor1", "creditor", 80m), register.ToSnapshot() with { Debts = [] });
     }
 
     [Fact]
@@ -43,7 +46,8 @@ public class PayDebtTests
 
         inMemoryDebtRegister.Feed(register);
 
-        Verify(new("debtor1", "creditor", 60m), [new Debt("debtor1", "creditor", 20.0m)]);
+        Verify(new("debtor1", "creditor", 60m),
+            register.ToSnapshot() with { Debts = [new DebtSnapshot("debtor1", "creditor", 20.0m)] });
     }
 
     [Fact]
@@ -53,15 +57,16 @@ public class PayDebtTests
 
         inMemoryDebtRegister.Feed(register);
 
-        this.Invoking(s => s.Verify(new("debtor1", "creditor", 90m), [])).Should().Throw<PayDebtAmountOverException>();
+        this.Invoking(s => s.Verify(new("debtor1", "creditor", 90m), register.ToSnapshot())).Should()
+            .Throw<PayDebtAmountOverException>();
     }
 
-    private void Verify(Debt debt, params Debt[] expected)
+    private void Verify(Debt debt, DebtRegisterSnapshot expected)
     {
         sut.Pay(debt);
 
         DebtRegister actual = inMemoryDebtRegister.Get();
 
-        actual.ExistingDebts.Should().Equal(expected);
+        actual.ToSnapshot().Should().BeEquivalentTo(expected);
     }
 }
