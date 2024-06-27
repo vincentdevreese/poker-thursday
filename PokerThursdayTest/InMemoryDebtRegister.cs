@@ -1,5 +1,7 @@
 ﻿
 
+using PokerThursday;
+
 namespace PokerThursdayTest
 {
     public class InMemoryDebtRegister : IInMemoryDebtRegister

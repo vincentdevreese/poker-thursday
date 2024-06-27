@@ -1,4 +1,4 @@
-﻿namespace PokerThursdayTest;
+﻿namespace PokerThursday;
 
 public record Debt(string Debtor, string Creditor, decimal Amount)
 {

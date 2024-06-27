@@ -1,4 +1,4 @@
-﻿namespace PokerThursdayTest
+﻿namespace PokerThursday
 {
     public interface IInMemoryDebtRegister
     {

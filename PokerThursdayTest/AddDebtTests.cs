@@ -1,4 +1,5 @@
 using FluentAssertions;
+using PokerThursday;
 
 namespace PokerThursdayTest;
 
@@ -7,19 +8,19 @@ namespace PokerThursdayTest;
 // StrykerMutator
 public class AddDebtTests
 {
-    private InMemoryDebtRegister inMemoryDebtRegister = new();
+    private readonly InMemoryDebtRegister inMemoryDebtRegister = new();
 
-    private AddDebt sut;
+    private readonly AddDebt sut;
 
     public AddDebtTests()
     {
-        sut = new(inMemoryDebtRegister);
+        sut = new AddDebt(this.inMemoryDebtRegister);
     }
 
     [Fact]
-    public void ActShouldRegisterDebtInRegistry()
+    public void AddShouldRegisterDebtInRegistry()
     {
-        DebtRegister debtRegister = new DebtRegister([]);
+        DebtRegister debtRegister = new([]);
         this.inMemoryDebtRegister.Feed(debtRegister);
 
         string debtor = "user1";
@@ -31,12 +32,12 @@ public class AddDebtTests
     }
 
     [Fact]
-    public void ActShouldRegisterAnotherDebt()
+    public void AddShouldRegisterAnotherDebt()
     {
         var existingDebts = new List<Debt>();
         existingDebts.Add(new Debt("des trucs", "bidon", 50m));
 
-        DebtRegister debtRegister = new DebtRegister(existingDebts);
+        DebtRegister debtRegister = new(existingDebts);
         this.inMemoryDebtRegister.Feed(debtRegister);
 
         string debtor = "vincent";
@@ -54,11 +55,11 @@ public class AddDebtTests
     }
 
     [Fact]
-    public void ActShouldRegisterAnotherDebtOnExistingDebtor()
+    public void AddShouldRegisterAnotherDebtOnExistingDebtor()
     {
         var existingDebts = new List<Debt>();
-        existingDebts.Add(new("vincent", "dimitri", 30m));
-        DebtRegister debtRegister = new DebtRegister(existingDebts);
+        existingDebts.Add(new Debt((string)"vincent", (string)"dimitri", 30m));
+        DebtRegister debtRegister = new(existingDebts);
         this.inMemoryDebtRegister.Feed(debtRegister);
 
         this.Verify(new Debt("vincent", "dimitri", 120.0m), debtRegister.ToSnapshot() with
@@ -72,7 +73,7 @@ public class AddDebtTests
 
     private void Verify(Debt debt, DebtRegisterSnapshot expected)
     {
-        this.sut.Act(debt);
+        this.sut.Add(debt);
 
         DebtRegister actual = this.inMemoryDebtRegister.Get();
 

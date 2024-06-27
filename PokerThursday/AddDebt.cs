@@ -1,15 +1,15 @@
-﻿namespace PokerThursdayTest;
+﻿namespace PokerThursday;
 
 public class AddDebt
 {
-    private IInMemoryDebtRegister inMemoryDebtRegister;
+    private readonly IInMemoryDebtRegister inMemoryDebtRegister;
 
     public AddDebt(IInMemoryDebtRegister inMemoryDebtRegister)
     {
         this.inMemoryDebtRegister = inMemoryDebtRegister;
     }
 
-    public void Act(Debt debt)
+    public void Add(Debt debt)
     {
         var debtRegister = this.inMemoryDebtRegister.Get();
         debtRegister.Act(debt);

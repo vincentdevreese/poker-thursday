@@ -1,21 +1,20 @@
 using FluentAssertions;
+using PokerThursday;
 using PokerThursdayTest.AutoFixture;
 using static PokerThursdayTest.Randomizer;
 
 namespace PokerThursdayTest;
 
-// StrykerMutator
-// AutoFixture
 // Builder
 public class PayDebtTests
 {
-    private InMemoryDebtRegister inMemoryDebtRegister = new();
+    private readonly InMemoryDebtRegister inMemoryDebtRegister = new();
 
-    private PayDebt sut;
+    private readonly PayDebt sut;
 
     public PayDebtTests()
     {
-        sut = new(inMemoryDebtRegister);
+        sut = new PayDebt(this.inMemoryDebtRegister);
     }
 
     [Theory]
