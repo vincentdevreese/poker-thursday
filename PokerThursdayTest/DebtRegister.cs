@@ -14,7 +14,7 @@ public class DebtRegister
     }
 
     public DebtRegisterSnapshot ToSnapshot() =>
-        new(this.existingDebts.Select(d => new DebtSnapshot(d.Debtor, d.Creditor, d.Amount)).ToList());
+        new(this.existingDebts.Select(d => d.ToSnapshot()).ToList());
     
     public static DebtRegister From(DebtRegisterSnapshot snapshot) => 
         new(snapshot.Debts.Select(d => new Debt(d.Debtor, d.Creditor, d.Amount)).ToList());

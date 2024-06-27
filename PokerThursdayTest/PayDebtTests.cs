@@ -1,4 +1,6 @@
 using FluentAssertions;
+using PokerThursdayTest.AutoFixture;
+using static PokerThursdayTest.Randomizer;
 
 namespace PokerThursdayTest;
 
@@ -17,47 +19,52 @@ public class PayDebtTests
     }
 
     [Theory]
-    [InlineData("vincent", "dimitri", "vincent", "daniel")]
-    [InlineData("vincent", "dimitri", "daniel", "dimitri")]
-    public void PayShouldDoNothingWhenNoDebtExistsForDebtorAndCreditor(string existingDebtor, string existingCreditor,
-        string targetDebtor, string targetCreditor)
+    [RandomData]
+    public void PayShouldDoNothingWhenNoDebtExistsForDebtorAndCreditor(Debt existingDebt)
     {
-        var register = new DebtRegister([new Debt(existingDebtor, existingCreditor, 10)]);
+        var register = new DebtRegister([existingDebt]);
 
-        inMemoryDebtRegister.Feed(register);
+        this.Feed(register);
 
-        Verify(new Debt(targetDebtor, targetCreditor, 10.0m), register.ToSnapshot());
+        this.Verify(existingDebt with { Debtor = Another(existingDebt.Debtor) }, register.ToSnapshot());
+        this.Verify(existingDebt with { Creditor = Another(existingDebt.Creditor) }, register.ToSnapshot());
     }
 
-    [Fact]
-    public void PayShouldEraseDebtFromDebtRegister()
+    [Theory]
+    [RandomData]
+    public void PayShouldEraseDebtFromDebtRegister(Debt existingDebt)
     {
-        var register = new DebtRegister([new("debtor1", "creditor", 80m)]);
+        var register = new DebtRegister([existingDebt]);
 
-        inMemoryDebtRegister.Feed(register);
+        this.Feed(register);
 
-        Verify(new("debtor1", "creditor", 80m), register.ToSnapshot() with { Debts = [] });
+        this.Verify(existingDebt, register.ToSnapshot() with { Debts = [] });
     }
 
-    [Fact]
-    public void PayShouldUpdateDebtFromDebtRegister()
+    [Theory]
+    [RandomData]
+    public void PayShouldUpdateDebtFromDebtRegister(Debt existingDebt)
     {
-        var register = new DebtRegister([new("debtor1", "creditor", 80m)]);
+        var register = new DebtRegister([existingDebt with { Amount = 80m }]);
 
-        inMemoryDebtRegister.Feed(register);
+        this.Feed(register);
 
-        Verify(new("debtor1", "creditor", 60m),
-            register.ToSnapshot() with { Debts = [new DebtSnapshot("debtor1", "creditor", 20.0m)] });
+        Verify(
+            existingDebt with { Amount = 60 },
+            register.ToSnapshot() with { Debts = [existingDebt.ToSnapshot() with { Amount = 20 }] }
+        );
     }
 
-    [Fact]
-    public void PayShouldFailWhenAmountIsOverDebt()
+
+    [Theory]
+    [RandomData]
+    public void PayShouldFailWhenAmountIsOverDebt(Debt existingDebt)
     {
-        var register = new DebtRegister([new("debtor1", "creditor", 80m)]);
+        var register = new DebtRegister([existingDebt with { Amount = 80 }]);
 
-        inMemoryDebtRegister.Feed(register);
+        this.Feed(register);
 
-        this.Invoking(s => s.Verify(new("debtor1", "creditor", 90m), register.ToSnapshot())).Should()
+        this.Invoking(s => s.Verify(existingDebt with { Amount = 90 }, register.ToSnapshot())).Should()
             .Throw<PayDebtAmountOverException>();
     }
 
@@ -68,5 +75,10 @@ public class PayDebtTests
         DebtRegister actual = inMemoryDebtRegister.Get();
 
         actual.ToSnapshot().Should().BeEquivalentTo(expected);
+    }
+
+    private void Feed(DebtRegister register)
+    {
+        this.inMemoryDebtRegister.Feed(register);
     }
 }
