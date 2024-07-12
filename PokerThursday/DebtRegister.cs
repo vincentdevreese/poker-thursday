@@ -14,7 +14,7 @@ public class DebtRegister
     }
 
     public DebtRegisterSnapshot ToSnapshot() => new(this.existingDebts.Select(d => d.ToSnapshot()).ToList());
-    
+
     public static DebtRegister From(DebtRegisterSnapshot snapshot) =>
         new(snapshot.Debts.Select(d => new Debt(d.Debtor, d.Creditor, d.Amount)).ToList());
 
@@ -30,7 +30,7 @@ public class DebtRegister
         List<Debt> toto = [];
         foreach (var item in this.existingDebts)
         {
-            if (item.Debtor != debt.Debtor && item.Creditor != debt.Creditor)
+            if (item.Debtor != debt.Debtor || item.Creditor != debt.Creditor)
             {
                 toto.Add(item);
             }

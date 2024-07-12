@@ -1,0 +1,67 @@
+﻿@page "/counter"
+@using PokerThursday
+@inject IInMemoryDebtRegister Repo
+@inject AddDebt AddDebt
+@inject PayDebt PayDebt
+
+<PageTitle>Debt Register</PageTitle>
+
+<h1>Debt Register</h1>
+
+<table class="table table-active table-bordered table-light table-striped">
+    <thead>
+    <tr>
+        <th>Debtor</th>
+        <th>Creditor</th>
+        <th>Amount</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var debt in @Repo.Get().ToSnapshot().Debts)
+    {
+        <tr>
+            <td>@debt.Debtor</td>
+            <td>@debt.Creditor</td>
+            <td>@debt.Amount</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<EditForm Model="DebtToAdd" OnValidSubmit="Add">
+    <InputText @bind-Value="DebtToAdd.Debtor"></InputText>
+    <InputText @bind-Value="DebtToAdd.Creditor"></InputText>
+    <InputNumber @bind-Value="DebtToAdd.Amount"></InputNumber>
+    <button type="submit" class="btn btn-primary">Add</button>
+</EditForm>
+
+@* <button class="btn btn-primary" @onclick="Add">Add debt</button> *@
+@* <button class="btn btn-primary" @onclick="Pay">Pay debt</button> *@
+
+@code {
+    private int currentCount = 0;
+    public DebtToAdd2 DebtToAdd { get; set; } = new DebtToAdd2();
+
+    // private void Add()
+    // {
+    //     AddDebt.Add(new Debt("a", "c", 10));
+    // }
+    //
+    // private void Pay()
+    // {
+    //     PayDebt.Pay(new Debt("a", "c", 10));
+    // }
+
+    private void Add()
+    {
+        AddDebt.Add(new Debt(DebtToAdd.Debtor, DebtToAdd.Creditor, DebtToAdd.Amount));
+    }
+
+    public class DebtToAdd2
+    {
+        public string Debtor { get; set; }
+        public string Creditor { get; set; }
+        public decimal Amount { get; set; }
+    }
+
+}

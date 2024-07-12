@@ -1,8 +1,4 @@
-﻿
-
-using PokerThursday;
-
-namespace PokerThursdayTest
+﻿namespace PokerThursday
 {
     public class InMemoryDebtRegister : IInMemoryDebtRegister
     {
@@ -13,7 +9,7 @@ namespace PokerThursdayTest
             this.snapshot = register.ToSnapshot();
         }
 
-        internal void Feed(DebtRegister register)
+        public void Feed(DebtRegister register)
         {
             this.snapshot = register.ToSnapshot();
         }
