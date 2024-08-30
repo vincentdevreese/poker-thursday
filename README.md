@@ -11,3 +11,5 @@ mov d -> commit mob branch to main branch
 git add .
 git commit -m "je commite"
 git push
+
+github deploy static web page 
