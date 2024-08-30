@@ -20,6 +20,11 @@ public class DebtRegister
 
     public void Act(Debt debt)
     {
+        EnsureIsValid(debt);
+
+        if (ShouldIgnore(debt))
+            return;
+
         decimal totalAmount = debt.Amount;
 
         List<Debt> toto = [];
@@ -40,12 +45,18 @@ public class DebtRegister
 
     public void Pay(Debt debt)
     {
+        EnsureIsValid(debt);
+
+        if (ShouldIgnore(debt))
+            return;
+
         var found = this.existingDebts.SingleOrDefault(x => x.Debtor == debt.Debtor && x.Creditor == debt.Creditor);
 
         if (found is not null)
         {
             if (found.Amount - debt.Amount < 0)
                 throw new PayDebtAmountOverException();
+
             this.existingDebts.Remove(found);
             if (found.Amount - debt.Amount != 0)
             {
@@ -54,4 +65,19 @@ public class DebtRegister
             }
         }
     }
+
+    private static void EnsureIsValid(Debt debt)
+    {
+        if (debt.Debtor == "")
+            throw new InvalidNameException();
+
+        if (debt.Creditor == "")
+            throw new InvalidNameException();
+
+        if (debt.Creditor == debt.Debtor)
+            throw new InvalidNameException();
+    }
+
+    private static bool ShouldIgnore(Debt debt)
+        => debt.Amount <= 0;
 }

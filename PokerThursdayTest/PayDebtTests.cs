@@ -1,6 +1,9 @@
 using FluentAssertions;
+
 using PokerThursday;
+
 using PokerThursdayTest.AutoFixture;
+
 using static PokerThursdayTest.Randomizer;
 
 namespace PokerThursdayTest;
@@ -19,7 +22,7 @@ public class PayDebtTests
 
     [Theory]
     [RandomData]
-    public void PayShouldDoNothingWhenNoDebtExistsForDebtorAndCreditor(Debt existingDebt)
+    public void ShouldDoNothingWhenNoDebtExistsForDebtorAndCreditor(Debt existingDebt)
     {
         var register = new DebtRegister([existingDebt]);
 
@@ -31,7 +34,7 @@ public class PayDebtTests
 
     [Theory]
     [RandomData]
-    public void PayShouldEraseDebtFromDebtRegister(Debt existingDebt)
+    public void ShouldEraseDebtFromDebtRegister(Debt existingDebt)
     {
         var register = new DebtRegister([existingDebt]);
 
@@ -42,7 +45,7 @@ public class PayDebtTests
 
     [Theory]
     [RandomData]
-    public void PayShouldUpdateDebtFromDebtRegister(Debt existingDebt)
+    public void ShouldUpdateDebtFromDebtRegister(Debt existingDebt)
     {
         var register = new DebtRegister([existingDebt with { Amount = 80m }]);
 
@@ -57,7 +60,7 @@ public class PayDebtTests
 
     [Theory]
     [RandomData]
-    public void PayShouldFailWhenAmountIsOverDebt(Debt existingDebt)
+    public void ShouldFailWhenAmountIsOverDebt(Debt existingDebt)
     {
         var register = new DebtRegister([existingDebt with { Amount = 80 }]);
 
@@ -65,6 +68,49 @@ public class PayDebtTests
 
         this.Invoking(s => s.Verify(existingDebt with { Amount = 90 }, register.ToSnapshot())).Should()
             .Throw<PayDebtAmountOverException>();
+    }
+
+
+    [Theory]
+    [InlineRandomData(0)]
+    [InlineRandomData(-10)]
+    public void ShouldIgnoreDebtWhenAmountIsInvalid(int amount, Debt existingDebt)
+    {
+        var register = new DebtRegister([existingDebt]);
+
+        Feed(register);
+
+        this.Verify(existingDebt with { Amount = amount }, register.ToSnapshot());
+    }
+
+    [Theory]
+    [RandomData]
+    public void ShouldFailWhenDebtorInvalid(Debt debt, DebtRegisterSnapshot debtRegister)
+    {
+        Feed(debtRegister);
+
+        this.Invoking(s => s.Verify(debt with { Debtor = string.Empty }, debtRegister)).Should()
+            .Throw<InvalidNameException>();
+    }
+
+    [Theory]
+    [RandomData]
+    public void ShouldFailWhenCreditorIsInvalid(Debt debt, DebtRegisterSnapshot debtRegister)
+    {
+        Feed(debtRegister);
+
+        this.Invoking(s => s.Verify(debt with { Creditor = string.Empty }, debtRegister)).Should()
+            .Throw<InvalidNameException>();
+    }
+
+    [Theory]
+    [RandomData]
+    public void ShouldFailWhenDebtorNameEqualsCreditorName(string someone, Debt debt, DebtRegisterSnapshot debtRegister)
+    {
+        Feed(debtRegister);
+
+        this.Invoking(s => s.Verify(debt with { Debtor = someone, Creditor = someone }, debtRegister)).Should()
+            .Throw<InvalidNameException>();
     }
 
     private void Verify(Debt debt, DebtRegisterSnapshot expected)
@@ -79,5 +125,10 @@ public class PayDebtTests
     private void Feed(DebtRegister register)
     {
         this.inMemoryDebtRegister.Feed(register);
+    }
+
+    private void Feed(DebtRegisterSnapshot debtRegister)
+    {
+        this.inMemoryDebtRegister.Feed(debtRegister);
     }
 }

@@ -14,6 +14,11 @@
             this.snapshot = register.ToSnapshot();
         }
 
+        public void Feed(DebtRegisterSnapshot register)
+        {
+            this.snapshot = register;
+        }
+
         public DebtRegister Get()
         {
             return DebtRegister.From(this.snapshot);

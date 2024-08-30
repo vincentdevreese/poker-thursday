@@ -2,6 +2,8 @@ using FluentAssertions;
 
 using PokerThursday;
 
+using PokerThursdayTest.AutoFixture;
+
 namespace PokerThursdayTest;
 
 // TODO redondance test, x dettes?
@@ -78,7 +80,6 @@ public class AddDebtTests
             });
     }
 
-
     [Fact]
     public void AddShouldRegisterAnotherDebtOnExistingDebtor()
     {
@@ -96,6 +97,51 @@ public class AddDebtTests
                 new DebtSnapshot("vincent", "dimitri", 150m)
             ]
         });
+    }
+
+    [Theory]
+    [InlineRandomData(0)]
+    [InlineRandomData(-10)]
+    public void AddShouldIgnoreDebtWhenAmountIsInvalid(int amount, Debt debt, DebtRegisterSnapshot debtRegister)
+    {
+        Feed(debtRegister);
+
+        this.Verify(debt with { Amount = amount }, debtRegister);
+    }
+
+    [Theory]
+    [RandomData]
+    public void AddShouldFailWhenDebtorInvalid(Debt debt, DebtRegisterSnapshot debtRegister)
+    {
+        Feed(debtRegister);
+
+        this.Invoking(s => s.Verify(debt with { Debtor = string.Empty }, debtRegister)).Should()
+            .Throw<InvalidNameException>();
+    }
+
+    [Theory]
+    [RandomData]
+    public void AddShouldFailWhenCreditorIsInvalid(Debt debt, DebtRegisterSnapshot debtRegister)
+    {
+        Feed(debtRegister);
+
+        this.Invoking(s => s.Verify(debt with { Creditor = string.Empty }, debtRegister)).Should()
+            .Throw<InvalidNameException>();
+    }
+
+    [Theory]
+    [RandomData]
+    public void AddShouldFailWhenDebtorNameEqualsCreditorName(string someone, Debt debt, DebtRegisterSnapshot debtRegister)
+    {
+        Feed(debtRegister);
+
+        this.Invoking(s => s.Verify(debt with { Debtor = someone, Creditor = someone }, debtRegister)).Should()
+            .Throw<InvalidNameException>();
+    }
+
+    private void Feed(DebtRegisterSnapshot debtRegister)
+    {
+        this.inMemoryDebtRegister.Feed(debtRegister);
     }
 
     private void Verify(Debt debt, DebtRegisterSnapshot expected)
