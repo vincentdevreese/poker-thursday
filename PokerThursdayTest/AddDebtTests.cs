@@ -1,4 +1,5 @@
 using FluentAssertions;
+
 using PokerThursday;
 
 namespace PokerThursdayTest;
@@ -55,10 +56,36 @@ public class AddDebtTests
     }
 
     [Fact]
-    public void AddShouldRegisterAnotherDebtOnExistingDebtor()
+    public void AddShouldRegisterAnotherDebt2()
     {
         var existingDebts = new List<Debt>();
-        existingDebts.Add(new Debt((string)"vincent", (string)"dimitri", 30m));
+        existingDebts.Add(new Debt("des trucs", "bidon", 50m));
+
+        DebtRegister debtRegister = new(existingDebts);
+        this.inMemoryDebtRegister.Feed(debtRegister);
+
+        string debtor = "des trucs";
+        string creditor = "des choses";
+
+        this.Verify(new Debt(debtor, creditor, 120.0m),
+            debtRegister.ToSnapshot() with
+            {
+                Debts =
+                [
+                    new DebtSnapshot("des trucs", "bidon", 50m),
+                    new DebtSnapshot(debtor, creditor, 120.0m)
+                ]
+            });
+    }
+
+
+    [Fact]
+    public void AddShouldRegisterAnotherDebtOnExistingDebtor()
+    {
+        var existingDebts = new List<Debt>
+        {
+            new Debt("vincent", "dimitri", 30m)
+        };
         DebtRegister debtRegister = new(existingDebts);
         this.inMemoryDebtRegister.Feed(debtRegister);
 

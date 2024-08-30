@@ -20,11 +20,6 @@ public class DebtRegister
 
     public void Act(Debt debt)
     {
-        if (this.existingDebts.Any(x => x.Debtor == debt.Debtor && x.Creditor == debt.Creditor))
-        {
-            this.existingDebts.Concat([new Debt(debt.Debtor, debt.Creditor, debt.Amount)]).ToArray();
-        }
-
         decimal totalAmount = debt.Amount;
 
         List<Debt> toto = [];
