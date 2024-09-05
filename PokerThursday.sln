@@ -8,12 +8,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Éléments de solution", "Éléments de solution", "{4FBEFDBE-66B6-470F-BBD4-AF5429F29B5F}"
 	ProjectSection(SolutionItems) = preProject
 		dotnet-tools.json = dotnet-tools.json
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokerThursday", "PokerThursday\PokerThursday.csproj", "{14CB99D3-A3E3-4345-85A6-F4128018FD60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokerThursdayBlazorApp", "PokerThursdayBlazorApp\PokerThursdayBlazorApp.csproj", "{0472F095-0268-49DB-A55D-6FCECCA1FD3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokerThursdayBlazorApp", "PokerThursdayBlazorApp\PokerThursdayBlazorApp.csproj", "{0472F095-0268-49DB-A55D-6FCECCA1FD3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
