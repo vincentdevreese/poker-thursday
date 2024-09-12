@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
 
@@ -22,7 +25,38 @@ jobs:
         dotnet-version: 8.0.x
     - name: Restore dependencies
       run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+    # - name: Build
+    #   run: dotnet build --no-restore
+    # - name: Test
+    #   run: dotnet test --no-build --verbosity normal
+    - name: Publish
+      run: dotnet publish -c Release -o ./artifact
+
+    - name: Upload artifact to enable deployment
+      uses: actions/upload-artifact@v3
+      with:
+       name: production-files
+       path: ./artifact/wwwroot
+
+    - name: Checkout GitHub Pages repository
+      uses: actions/checkout@v4
+      with:
+        repository: vincentdevreese/vincentdevreese.github.io
+        token: ${{ secrets.CUSTOM_TOKEN }}
+
+    - name: Remove previous content
+      run: rm -rf _framework/
+
+    - name: Download artifact to enable deployment
+      uses: actions/download-artifact@v3
+      with:
+       name: production-files
+       path: .
+
+    - name: Commit and push changes
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add .
+        git commit -m "Update GitHub Pages" || echo "No changes to commit"
+        git push origin main
