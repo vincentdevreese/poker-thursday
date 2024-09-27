@@ -1,8 +1,8 @@
 ﻿@page "/counter"
+@using System.ComponentModel.DataAnnotations
 @using PokerThursday
 @inject IInMemoryDebtRegister Repo
 @inject AddDebt AddDebt
-@inject PayDebt PayDebt
 
 <PageTitle>Debt Register</PageTitle>
 
@@ -17,7 +17,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var debt in @Repo.Get().ToSnapshot().Debts)
+        @foreach (DebtSnapshot debt in @Repo.Get().ToSnapshot().Debts)
         {
             <tr>
                 <td>@debt.Debtor</td>
@@ -28,40 +28,44 @@
     </tbody>
 </table>
 
-<EditForm Model="DebtToAdd" OnValidSubmit="Add">
+<EditForm EditContext="editContext" OnValidSubmit="Add">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
     <InputText @bind-Value="DebtToAdd.Debtor"></InputText>
     <InputText @bind-Value="DebtToAdd.Creditor"></InputText>
     <InputNumber @bind-Value="DebtToAdd.Amount"></InputNumber>
     <button type="submit" class="btn btn-primary">Add</button>
 </EditForm>
 
-@* <button class="btn btn-primary" @onclick="Add">Add debt</button> *@
-@* <button class="btn btn-primary" @onclick="Pay">Pay debt</button> *@
-
 @code {
-    private int currentCount = 0;
-    public DebtToAdd2 DebtToAdd { get; set; } = new DebtToAdd2();
 
-    // private void Add()
-    // {
-    //     AddDebt.Add(new Debt("a", "c", 10));
-    // }
-    //
-    // private void Pay()
-    // {
-    //     PayDebt.Pay(new Debt("a", "c", 10));
-    // }
+    public DebtToAdd2 DebtToAdd { get; set; } = new();
+    private EditContext? editContext;
+    private ValidationMessageStore? validationMessageStore;
+
+    protected override void OnInitialized()
+    {
+        editContext = new(DebtToAdd);
+        validationMessageStore = new ValidationMessageStore(editContext);
+        editContext.OnFieldChanged += (f, j) => validationMessageStore.Clear();
+    }
 
     private void Add()
     {
-        AddDebt.Add(new Debt(DebtToAdd.Debtor, DebtToAdd.Creditor, DebtToAdd.Amount));
+        try
+        {
+            AddDebt.Add(new Debt(DebtToAdd.Debtor, DebtToAdd.Creditor, DebtToAdd.Amount));
+        }
+        catch (InvalidNameException)
+        {
+            validationMessageStore!.Add(() => DebtToAdd.Debtor, "Creditor and debitor must be different");
+        }
     }
 
     public class DebtToAdd2
     {
-        public string Debtor { get; set; }
-        public string Creditor { get; set; }
-        public decimal Amount { get; set; }
+        [Required] public string Debtor { get; set; }
+        [Required] public string Creditor { get; set; }
+        [Range(1, 1000)] public decimal Amount { get; set; }
     }
-
 }
