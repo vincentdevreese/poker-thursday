@@ -3,6 +3,7 @@
 @using PokerThursday
 @inject IInMemoryDebtRegister Repo
 @inject AddDebt AddDebt
+@inject PayDebt PayDebt
 
 <PageTitle>Debt Register</PageTitle>
 
@@ -28,26 +29,45 @@
     </tbody>
 </table>
 
-<EditForm EditContext="editContext" OnValidSubmit="Add">
+<EditForm EditContext="editContextDebtToAdd" OnValidSubmit="Add" FormName="form-add-debt">
     <DataAnnotationsValidator />
-    <ValidationSummary />
     <InputText @bind-Value="DebtToAdd.Debtor"></InputText>
     <InputText @bind-Value="DebtToAdd.Creditor"></InputText>
     <InputNumber @bind-Value="DebtToAdd.Amount"></InputNumber>
     <button type="submit" class="btn btn-primary">Add</button>
+    <ValidationSummary />
+</EditForm>
+
+<hr />
+
+<EditForm EditContext="editContextDebtToPay" OnValidSubmit="Pay" FormName="form-pay-debt">
+    <DataAnnotationsValidator />
+    <InputText @bind-Value="DebtToPay.Debtor"></InputText>
+    <InputText @bind-Value="DebtToPay.Creditor"></InputText>
+    <InputNumber @bind-Value="DebtToPay.Amount"></InputNumber>
+    <button type="submit" class="btn btn-primary">Pay</button>
+    <ValidationSummary />
 </EditForm>
 
 @code {
 
-    public DebtToAdd2 DebtToAdd { get; set; } = new();
-    private EditContext? editContext;
-    private ValidationMessageStore? validationMessageStore;
+    public DebtToAddModel DebtToAdd { get; set; } = new();
+    private EditContext? editContextDebtToAdd;
+    private ValidationMessageStore? vmsDebtToAdd;
+
+    public DebtToPayModel DebtToPay { get; set; } = new();
+    private EditContext? editContextDebtToPay;
+    private ValidationMessageStore? vmsDebtToPay;
 
     protected override void OnInitialized()
     {
-        editContext = new(DebtToAdd);
-        validationMessageStore = new ValidationMessageStore(editContext);
-        editContext.OnFieldChanged += (f, j) => validationMessageStore.Clear();
+        editContextDebtToAdd = new(DebtToAdd);
+        vmsDebtToAdd = new ValidationMessageStore(editContextDebtToAdd);
+        editContextDebtToAdd.OnFieldChanged += (f, j) => vmsDebtToAdd.Clear();
+
+        editContextDebtToPay = new(DebtToPay);
+        vmsDebtToPay = new ValidationMessageStore(editContextDebtToPay);
+        editContextDebtToPay.OnFieldChanged += (f, j) => vmsDebtToPay.Clear();
     }
 
     private void Add()
@@ -58,11 +78,34 @@
         }
         catch (InvalidNameException)
         {
-            validationMessageStore!.Add(() => DebtToAdd.Debtor, "Creditor and debitor must be different");
+            vmsDebtToAdd!.Add(() => DebtToAdd.Debtor, "Creditor and debitor must be different");
         }
     }
 
-    public class DebtToAdd2
+    private void Pay()
+    {
+        try
+        {
+            PayDebt.Pay(new Debt(DebtToPay.Debtor, DebtToPay.Creditor, DebtToPay.Amount));
+        }
+        catch (InvalidNameException)
+        {
+            vmsDebtToPay!.Add(() => DebtToPay.Debtor, "Creditor and debitor must be different");
+        }
+        catch (PayDebtAmountOverException ex)
+        {
+            vmsDebtToPay!.Add(() => DebtToPay.Amount, "Your amount exceeds your debt");
+        }
+    }
+
+    public class DebtToAddModel
+    {
+        [Required] public string Debtor { get; set; }
+        [Required] public string Creditor { get; set; }
+        [Range(1, 1000)] public decimal Amount { get; set; }
+    }
+
+        public class DebtToPayModel
     {
         [Required] public string Debtor { get; set; }
         [Required] public string Creditor { get; set; }
