@@ -25,22 +25,34 @@ public class DebtRegister
         if (ShouldIgnore(debt))
             return;
 
+        var creditorExistingDebt =
+            this.existingDebts.SingleOrDefault(x => x.Debtor == debt.Creditor && x.Creditor == debt.Debtor);
+        if (creditorExistingDebt is not null)
+        {
+            if (debt.Amount > creditorExistingDebt.Amount)
+                this.existingDebts = [debt with { Amount = debt.Amount - creditorExistingDebt.Amount }];
+            else
+                this.existingDebts = [new Debt(debt.Creditor, debt.Debtor, creditorExistingDebt.Amount - debt.Amount)];
+
+            return;
+        }
+
         decimal totalAmount = debt.Amount;
 
-        List<Debt> toto = [];
-        foreach (var item in this.existingDebts)
+        List<Debt> updatedDebts = [];
+        foreach (var existingDebt in this.existingDebts)
         {
-            if (item.Debtor != debt.Debtor || item.Creditor != debt.Creditor)
+            if (existingDebt.Debtor != debt.Debtor || existingDebt.Creditor != debt.Creditor)
             {
-                toto.Add(item);
+                updatedDebts.Add(existingDebt);
             }
             else
             {
-                totalAmount += item.Amount;
+                totalAmount += existingDebt.Amount;
             }
         }
 
-        this.existingDebts = toto.Concat([new Debt(debt.Debtor, debt.Creditor, totalAmount)]).ToList();
+        this.existingDebts = updatedDebts.Concat([new Debt(debt.Debtor, debt.Creditor, totalAmount)]).ToList();
     }
 
     public void Pay(Debt debt)

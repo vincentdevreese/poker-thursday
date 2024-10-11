@@ -1,7 +1,5 @@
 using FluentAssertions;
-
 using PokerThursday;
-
 using PokerThursdayTest.AutoFixture;
 
 namespace PokerThursdayTest;
@@ -110,11 +108,51 @@ public class AddDebtTests
         DebtRegister debtRegister = new(existingDebts);
         this.inMemoryDebtRegister.Feed(debtRegister);
 
-        this.Verify(new Debt("dimitri", "vincent", 50.0m), debtRegister.ToSnapshot() with
+        this.Verify(new Debt("dimitri", "vincent", 55.0m), debtRegister.ToSnapshot() with
         {
             Debts =
             [
-                new DebtSnapshot("dimitri","vincent",  20m)
+                new DebtSnapshot("dimitri", "vincent", 25m)
+            ]
+        });
+    }
+
+    [Fact]
+    public void AddShouldRegisterAnotherDebtOnExistingDebtor2()
+    {
+        var existingDebts = new List<Debt>
+        {
+            new Debt("vincent", "dimitri", 130m)
+        };
+        DebtRegister debtRegister = new(existingDebts);
+        this.inMemoryDebtRegister.Feed(debtRegister);
+
+        this.Verify(new Debt("dimitri", "vincent", 55.0m), debtRegister.ToSnapshot() with
+        {
+            Debts =
+            [
+                new DebtSnapshot("vincent" , "dimitri", 75m)
+            ]
+        });
+    }
+
+    [Fact]
+    public void AddShouldRegisterAnotherDebtOnExistingDebtor3()
+    {
+        var existingDebts = new List<Debt>
+        {
+            new Debt("vincent", "dimitri", 130m),
+            new Debt("claude", "hervé", 10m)
+        };
+        DebtRegister debtRegister = new(existingDebts);
+        this.inMemoryDebtRegister.Feed(debtRegister);
+
+        this.Verify(new Debt("dimitri", "vincent", 55.0m), debtRegister.ToSnapshot() with
+        {
+            Debts =
+            [
+                new DebtSnapshot("claude", "hervé", 10m),
+                new DebtSnapshot("vincent" , "dimitri", 75m)
             ]
         });
     }
@@ -152,7 +190,8 @@ public class AddDebtTests
 
     [Theory]
     [RandomData]
-    public void AddShouldFailWhenDebtorNameEqualsCreditorName(string someone, Debt debt, DebtRegisterSnapshot debtRegister)
+    public void AddShouldFailWhenDebtorNameEqualsCreditorName(string someone, Debt debt,
+        DebtRegisterSnapshot debtRegister)
     {
         Feed(debtRegister);
 
