@@ -41,8 +41,9 @@ public class DebtRegister
             {
                 if (debt.Amount > creditorExistingDebt.Amount)
                     debt = new Debt(debt.Debtor, debt.Creditor, debt.Amount - creditorExistingDebt.Amount);
-                else
+                else if (debt.Amount < creditorExistingDebt.Amount)
                     debt = new Debt(debt.Creditor, debt.Debtor, creditorExistingDebt.Amount - debt.Amount);
+                else return;
             }
         }
 
