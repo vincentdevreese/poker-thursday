@@ -1,4 +1,5 @@
 using FluentAssertions;
+
 using PokerThursday;
 
 namespace PokerThursdayTest;
@@ -28,7 +29,15 @@ public class SuggestTests
     [Fact]
     public void Should_test_name_3()
     {
+        Debt debt1 = new("a", "b", 10);
+        Debt debt3 = new("b", "a", 20);
+
+        Debt debt2 = new("c", "d", 20);
+
+        this.Verify([debt1, debt2]);
+
     }
+
 
     private void Verify(Debt[] a)
     {

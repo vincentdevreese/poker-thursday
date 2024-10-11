@@ -99,6 +99,27 @@ public class AddDebtTests
         });
     }
 
+
+    [Fact]
+    public void AddShouldRegisterAnotherDebtOnExistingDebtor1()
+    {
+        var existingDebts = new List<Debt>
+        {
+            new Debt("vincent", "dimitri", 30m)
+        };
+        DebtRegister debtRegister = new(existingDebts);
+        this.inMemoryDebtRegister.Feed(debtRegister);
+
+        this.Verify(new Debt("dimitri", "vincent", 50.0m), debtRegister.ToSnapshot() with
+        {
+            Debts =
+            [
+                new DebtSnapshot("dimitri","vincent",  20m)
+            ]
+        });
+    }
+
+
     [Theory]
     [InlineRandomData(0)]
     [InlineRandomData(-10)]
