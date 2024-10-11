@@ -1,5 +1,7 @@
 using FluentAssertions;
+
 using PokerThursday;
+
 using PokerThursdayTest.AutoFixture;
 
 namespace PokerThursdayTest;
@@ -99,6 +101,28 @@ public class AddDebtTests
 
 
     [Fact]
+    public void AddShouldRegisterAnotherDebtOnExistingDebtor100()
+    {
+        var existingDebts = new List<Debt>
+        {
+            new Debt("vincent", "dimitri", 30m),
+            new Debt("claude", "francois", 50m)
+        };
+        DebtRegister debtRegister = new(existingDebts);
+        this.inMemoryDebtRegister.Feed(debtRegister);
+
+        this.Verify(new Debt("vincent", "dimitri", 120.0m), debtRegister.ToSnapshot() with
+        {
+            Debts =
+            [
+                new DebtSnapshot("claude", "francois", 50m),
+                new DebtSnapshot("vincent", "dimitri", 150m),
+            ]
+        });
+    }
+
+
+    [Fact]
     public void AddShouldRegisterAnotherDebtOnExistingDebtor1()
     {
         var existingDebts = new List<Debt>
@@ -152,7 +176,7 @@ public class AddDebtTests
             Debts =
             [
                 new DebtSnapshot("claude", "hervé", 10m),
-                new DebtSnapshot("vincent" , "dimitri", 75m)
+                new DebtSnapshot("vincent" , "dimitri", 75m),
             ]
         });
     }
@@ -210,6 +234,6 @@ public class AddDebtTests
 
         DebtRegister actual = this.inMemoryDebtRegister.Get();
 
-        actual.ToSnapshot().Should().BeEquivalentTo(expected);
+        actual.ToSnapshot().Should().BeEquivalentTo(expected, o => o.WithStrictOrdering());
     }
 }

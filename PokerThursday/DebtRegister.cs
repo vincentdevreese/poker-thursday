@@ -26,33 +26,27 @@ public class DebtRegister
             return;
 
         var creditorExistingDebt =
-            this.existingDebts.SingleOrDefault(x => x.Debtor == debt.Creditor && x.Creditor == debt.Debtor);
+            this.existingDebts.SingleOrDefault(x =>
+            (x.Debtor == debt.Creditor && x.Creditor == debt.Debtor)
+            ||
+            (x.Debtor == debt.Debtor && x.Creditor == debt.Creditor));
+
         if (creditorExistingDebt is not null)
         {
-            if (debt.Amount > creditorExistingDebt.Amount)
-                this.existingDebts = [debt with { Amount = debt.Amount - creditorExistingDebt.Amount }];
-            else
-                this.existingDebts = [new Debt(debt.Creditor, debt.Debtor, creditorExistingDebt.Amount - debt.Amount)];
+            existingDebts.Remove(creditorExistingDebt);
 
-            return;
-        }
-
-        decimal totalAmount = debt.Amount;
-
-        List<Debt> updatedDebts = [];
-        foreach (var existingDebt in this.existingDebts)
-        {
-            if (existingDebt.Debtor != debt.Debtor || existingDebt.Creditor != debt.Creditor)
-            {
-                updatedDebts.Add(existingDebt);
-            }
+            if (creditorExistingDebt.Debtor == debt.Debtor)
+                debt = debt with { Amount = debt.Amount + creditorExistingDebt.Amount };
             else
             {
-                totalAmount += existingDebt.Amount;
+                if (debt.Amount > creditorExistingDebt.Amount)
+                    debt = new Debt(debt.Debtor, debt.Creditor, debt.Amount - creditorExistingDebt.Amount);
+                else
+                    debt = new Debt(debt.Creditor, debt.Debtor, creditorExistingDebt.Amount - debt.Amount);
             }
         }
 
-        this.existingDebts = updatedDebts.Concat([new Debt(debt.Debtor, debt.Creditor, totalAmount)]).ToList();
+        existingDebts.Add(debt);
     }
 
     public void Pay(Debt debt)
