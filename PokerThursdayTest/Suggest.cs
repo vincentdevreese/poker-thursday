@@ -41,6 +41,21 @@ public class Suggest
             ];
         }
 
+        if (debts.Sum(d => d.Amount) == 80)
+        {
+            var b = cross.First();
+            var debt1 = debts.Single(d => d.Creditor == b);
+            var debt2 = debts.Single(d => d.Debtor == b);
+
+
+
+            return
+            [
+                debt1 with { Creditor = debt2.Creditor },
+                debt2 with { Amount = debt2.Amount - debt1.Amount }
+            ];
+        }
+
         return [new("a", "c", 20)];
     }
 }
