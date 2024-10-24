@@ -19,4 +19,6 @@ github deploy static web page
 dont trust your friends to pay debts at next session (each player always bring money to play the game)
 
 // feature
+--suggest to zip register
 --suggest pay debt at any moment (with price money won on this game for example)
+--warning suggest don't suggest debt between different communities
