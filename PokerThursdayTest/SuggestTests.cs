@@ -101,6 +101,22 @@ public class SuggestTests
         );
     }
 
+    [Fact]
+    public void Should_test_name_9()
+    {
+        Debt debt1 = new("a", "b", 20);
+        Debt debt2 = new("b", "c", 30);
+        Debt debt3 = new("c", "d", 30);
+
+        this.Verify(
+            [debt1, debt2, debt3],
+            [
+                new("a", "d", 20),
+                new("b", "d", 10),
+            ]
+        );
+    }
+
     private void Verify(Debt[] register, Debt[] expected)
     {
         Debt[] actual = this.sut.Do(register);
