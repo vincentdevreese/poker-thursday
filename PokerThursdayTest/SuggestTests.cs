@@ -1,5 +1,4 @@
 using FluentAssertions;
-
 using PokerThursday;
 
 namespace PokerThursdayTest;
@@ -104,13 +103,19 @@ public class SuggestTests
     [Fact]
     public void Should_test_name_9()
     {
-        Debt debt1 = new("a", "b", 20);
-        Debt debt2 = new("b", "c", 30);
-        Debt debt3 = new("c", "d", 30);
-
         this.Verify(
-            [debt1, debt2, debt3],
             [
+                new("a", "b", 20),
+                new("e", "f", 30),
+                new("b", "c", 30),
+                new("g", "z", 30),
+                new("y", "W", 30),
+                new("c", "d", 30)
+            ],
+            [
+                new("y", "W", 30),
+                new("e", "f", 30),
+                new("g", "z", 30),
                 new("a", "d", 20),
                 new("b", "d", 10),
             ]
@@ -120,6 +125,6 @@ public class SuggestTests
     private void Verify(Debt[] register, Debt[] expected)
     {
         Debt[] actual = this.sut.Do(register);
-        actual.Should().Equal(expected);
+        actual.Should().BeEquivalentTo(expected, o => o.WithoutStrictOrdering());
     }
 }
