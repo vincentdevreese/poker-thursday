@@ -20,28 +20,28 @@ public class AddDebtTests
         sut = new AddDebt(this.inMemoryDebtRegister);
     }
 
-    //[Fact]
-    //public void AddShouldRegisterAnotherDebt2()
-    //{
-    //    var existingDebts = new List<Debt>();
-    //    existingDebts.Add(new Debt("des trucs", "bidon", 50m));
+    [Fact]
+    public void AddShouldRegisterAnotherDebt2()
+    {
+        var existingDebts = new List<Debt>();
+        existingDebts.Add(new Debt("des trucs", "bidon", 50m));
 
-    //    DebtRegister debtRegister = new(existingDebts);
-    //    this.inMemoryDebtRegister.Feed(debtRegister);
+        DebtRegister debtRegister = new(existingDebts);
+        this.inMemoryDebtRegister.Feed(debtRegister);
 
-    //    string debtor = "des trucs";
-    //    string creditor = "des choses";
+        string debtor = "des trucs";
+        string creditor = "des choses";
 
-    //    this.Verify(new Debt(debtor, creditor, 120.0m),
-    //        debtRegister.ToSnapshot() with
-    //        {
-    //            Debts =
-    //            [
-    //                new DebtSnapshot("des trucs", "bidon", 50m),
-    //                new DebtSnapshot(debtor, creditor, 120.0m)
-    //            ]
-    //        });
-    //}
+        this.Verify(new Debt(debtor, creditor, 120.0m),
+            debtRegister.ToSnapshot() with
+            {
+                Debts =
+                [
+                    new DebtSnapshot("des trucs", "bidon", 50m),
+                    new DebtSnapshot(debtor, creditor, 120.0m)
+                ]
+            });
+    }
 
     [Fact]
     public void AddShouldRegisterAnotherDebtOnExistingDebtor()
