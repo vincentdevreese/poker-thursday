@@ -1,5 +1,4 @@
 using FluentAssertions;
-
 using PokerThursday;
 
 namespace PokerThursdayTest;
@@ -7,6 +6,7 @@ namespace PokerThursdayTest;
 public class SuggestTests
 {
     private readonly Suggest sut = new();
+
     private static Debt ADebtFrom(int amount) =>
         Randomizer.Any<Debt>() with { Amount = amount };
 
@@ -53,27 +53,39 @@ public class SuggestTests
         this.Verify([debt1, debt2, debt3], [debt1, debt2, debt3]);
     }
 
+    [Fact]
+    public void Should_test_name_6()
+    {
+        Debt debt1 = new("a", "b", 20);
+        Debt debt2 = new("b", "c", 10);
+
+        this.Verify(
+            [debt1, debt2],
+            [
+                new("a", "b", 10),
+                new("a", "c", 10)
+            ]
+        );
+    }
+
+    [Fact]
+    public void Should_test_name_7()
+    {
+        Debt debt1 = new("a", "b", 20);
+        Debt debt2 = new("b", "c", 30);
+
+        this.Verify(
+            [debt1, debt2],
+            [
+                new("a", "c", 20),
+                new("b", "c", 10)
+            ]
+        );
+    }
+
     private void Verify(Debt[] register, Debt[] expected)
     {
         Debt[] actual = this.sut.Do(register);
         actual.Should().Equal(expected);
-    }
-}
-
-public class Suggest
-{
-    public Debt[] Do(Debt[] debts)
-    {
-        if (debts.Length < 2)
-            return debts;
-
-        var cross = debts.Select(d => d.Debtor)
-            .Intersect(debts.Select(d => d.Creditor));
-
-        if (!cross.Any())
-            return debts;
-
-
-        return [new("a", "c", 20)];
     }
 }
