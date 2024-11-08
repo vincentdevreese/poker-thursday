@@ -1,19 +1,11 @@
-﻿namespace PokerThursday
+﻿namespace PokerThursday;
+
+public class PayDebt(IInMemoryDebtRegister inMemoryDebtRegister)
 {
-    public class PayDebt
+    public void Pay(Debt debt)
     {
-        private readonly IInMemoryDebtRegister inMemoryDebtRegister;
-
-        public PayDebt(IInMemoryDebtRegister inMemoryDebtRegister)
-        {
-            this.inMemoryDebtRegister = inMemoryDebtRegister;
-        }
-
-        public void Pay(Debt debt)
-        {
-            var debtRegister = this.inMemoryDebtRegister.Get();
-            debtRegister.Pay(debt);
-            this.inMemoryDebtRegister.Save(debtRegister);
-        }
+        DebtRegister debtRegister = inMemoryDebtRegister.Get();
+        debtRegister.Pay(debt);
+        inMemoryDebtRegister.Save(debtRegister);
     }
 }

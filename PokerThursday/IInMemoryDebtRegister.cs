@@ -1,8 +1,7 @@
-﻿namespace PokerThursday
+﻿namespace PokerThursday;
+
+public interface IInMemoryDebtRegister
 {
-    public interface IInMemoryDebtRegister
-    {
-        DebtRegister Get();
-        void Save(DebtRegister register);
-    }
+    DebtRegister Get();
+    void Save(DebtRegister register);
 }

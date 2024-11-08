@@ -4,19 +4,19 @@ public record DebtSnapshot(string Debtor, string Creditor, decimal Amount);
 
 public record DebtRegisterSnapshot(List<DebtSnapshot> Debts);
 
-public class DebtRegister
+public class DebtRegister(List<Debt> existingDebts)
 {
-    private List<Debt> existingDebts = [];
+    private List<Debt> existingDebts = existingDebts;
 
-    public DebtRegister(List<Debt> existingDebts)
+    public DebtRegisterSnapshot ToSnapshot()
     {
-        this.existingDebts = existingDebts;
+        return new DebtRegisterSnapshot(existingDebts.Select(d => d.ToSnapshot()).ToList());
     }
 
-    public DebtRegisterSnapshot ToSnapshot() => new(this.existingDebts.Select(d => d.ToSnapshot()).ToList());
-
-    public static DebtRegister From(DebtRegisterSnapshot snapshot) =>
-        new(snapshot.Debts.Select(d => new Debt(d.Debtor, d.Creditor, d.Amount)).ToList());
+    public static DebtRegister From(DebtRegisterSnapshot snapshot)
+    {
+        return new DebtRegister(snapshot.Debts.Select(d => new Debt(d.Debtor, d.Creditor, d.Amount)).ToList());
+    }
 
     public void Act(Debt debt)
     {
@@ -28,19 +28,13 @@ public class DebtRegister
         decimal totalAmount = debt.Amount;
 
         List<Debt> toto = [];
-        foreach (var item in this.existingDebts)
-        {
+        foreach (Debt item in existingDebts)
             if (item.Debtor != debt.Debtor || item.Creditor != debt.Creditor)
-            {
                 toto.Add(item);
-            }
             else
-            {
                 totalAmount += item.Amount;
-            }
-        }
 
-        this.existingDebts = toto.Concat([new Debt(debt.Debtor, debt.Creditor, totalAmount)]).ToList();
+        existingDebts = toto.Concat([new Debt(debt.Debtor, debt.Creditor, totalAmount)]).ToList();
     }
 
     public void Pay(Debt debt)
@@ -50,20 +44,18 @@ public class DebtRegister
         if (ShouldIgnore(debt))
             return;
 
-        var found = this.existingDebts.SingleOrDefault(x => x.Debtor == debt.Debtor && x.Creditor == debt.Creditor);
+        Debt? found = existingDebts.SingleOrDefault(x => x.Debtor == debt.Debtor && x.Creditor == debt.Creditor);
 
-        if (found is not null)
-        {
-            if (found.Amount - debt.Amount < 0)
-                throw new PayDebtAmountOverException();
+        if (found is null) return;
 
-            this.existingDebts.Remove(found);
-            if (found.Amount - debt.Amount != 0)
-            {
-                found = found with { Amount = found.Amount - debt.Amount };
-                this.existingDebts.Add(found);
-            }
-        }
+        if (found.Amount - debt.Amount < 0)
+            throw new PayDebtAmountOverException();
+
+        existingDebts.Remove(found);
+        if (found.Amount - debt.Amount == 0) return;
+
+        found = found with { Amount = found.Amount - debt.Amount };
+        existingDebts.Add(found);
     }
 
     private static void EnsureIsValid(Debt debt)
@@ -79,5 +71,7 @@ public class DebtRegister
     }
 
     private static bool ShouldIgnore(Debt debt)
-        => debt.Amount <= 0;
+    {
+        return debt.Amount <= 0;
+    }
 }

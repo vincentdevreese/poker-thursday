@@ -1,27 +1,26 @@
-﻿namespace PokerThursday
+﻿namespace PokerThursday;
+
+public class InMemoryDebtRegister : IInMemoryDebtRegister
 {
-    public class InMemoryDebtRegister : IInMemoryDebtRegister
+    private DebtRegisterSnapshot snapshot = default!;
+
+    public void Save(DebtRegister register)
     {
-        private DebtRegisterSnapshot snapshot;
+        snapshot = register.ToSnapshot();
+    }
 
-        public void Save(DebtRegister register)
-        {
-            this.snapshot = register.ToSnapshot();
-        }
+    public DebtRegister Get()
+    {
+        return DebtRegister.From(snapshot);
+    }
 
-        public void Feed(DebtRegister register)
-        {
-            this.snapshot = register.ToSnapshot();
-        }
+    public void Feed(DebtRegister register)
+    {
+        snapshot = register.ToSnapshot();
+    }
 
-        public void Feed(DebtRegisterSnapshot register)
-        {
-            this.snapshot = register;
-        }
-
-        public DebtRegister Get()
-        {
-            return DebtRegister.From(this.snapshot);
-        }
+    public void Feed(DebtRegisterSnapshot register)
+    {
+        snapshot = register;
     }
 }
