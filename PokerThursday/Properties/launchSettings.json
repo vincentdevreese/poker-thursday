@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Mutation": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "workingDirectory": "$(ProjectDir)",
+      "commandLineArgs": "stryker -o -p $(ProjectName) -tp ../$(ProjectName)Test/$(ProjectName)Test.csproj"
+    }
+  }
+}

@@ -5,7 +5,6 @@ using static PokerThursdayTest.Randomizer;
 
 namespace PokerThursdayTest;
 
-// Builder
 public class PayDebtTests
 {
     private readonly InMemoryDebtRegister inMemoryDebtRegister = new();

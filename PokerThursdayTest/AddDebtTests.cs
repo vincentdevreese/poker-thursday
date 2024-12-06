@@ -15,63 +15,21 @@ public class AddDebtTests
 
     public AddDebtTests()
     {
-        sut = new AddDebt(inMemoryDebtRegister);
-    }
-
-    [Fact]
-    public void AddShouldRegisterDebtInRegistry()
-    {
-        DebtRegister debtRegister = new([]);
-        inMemoryDebtRegister.Feed(debtRegister);
-
-        string debtor = "user1";
-        string creditor = "creditor";
-
-        Verify(new Debt(debtor, creditor, 30.0m),
-            debtRegister.ToSnapshot() with { Debts = [new DebtSnapshot(debtor, creditor, 30.0m)] }
-        );
-    }
-
-    [Fact]
-    public void AddShouldRegisterAnotherDebt()
-    {
-        List<Debt> existingDebts =
-        [
-            new("des trucs", "bidon", 50m)
-        ];
-
-        DebtRegister debtRegister = new(existingDebts);
-        inMemoryDebtRegister.Feed(debtRegister);
-
-        const string debtor = "vincent";
-        const string creditor = "dimitri";
-
-        Verify(new Debt(debtor, creditor, 120.0m),
-            debtRegister.ToSnapshot() with
-            {
-                Debts =
-                [
-                    new DebtSnapshot("des trucs", "bidon", 50m),
-                    new DebtSnapshot(debtor, creditor, 120.0m)
-                ]
-            });
+        this.sut = new AddDebt(this.inMemoryDebtRegister);
     }
 
     [Fact]
     public void AddShouldRegisterAnotherDebt2()
     {
-        List<Debt> existingDebts =
-        [
-            new("des trucs", "bidon", 50m)
-        ];
+        List<Debt> existingDebts = [new("des trucs", "bidon", 50m)];
 
         DebtRegister debtRegister = new(existingDebts);
-        inMemoryDebtRegister.Feed(debtRegister);
+        this.inMemoryDebtRegister.Feed(debtRegister);
 
         const string debtor = "des trucs";
         const string creditor = "des choses";
 
-        Verify(new Debt(debtor, creditor, 120.0m),
+        this.Verify(new Debt(debtor, creditor, 120.0m),
             debtRegister.ToSnapshot() with
             {
                 Debts =
@@ -87,9 +45,9 @@ public class AddDebtTests
     {
         List<Debt> existingDebts = [new("vincent", "dimitri", 30m)];
         DebtRegister debtRegister = new(existingDebts);
-        inMemoryDebtRegister.Feed(debtRegister);
+        this.inMemoryDebtRegister.Feed(debtRegister);
 
-        Verify(new Debt("vincent", "dimitri", 120.0m), debtRegister.ToSnapshot() with
+        this.Verify(new Debt("vincent", "dimitri", 120.0m), debtRegister.ToSnapshot() with
         {
             Debts =
             [
@@ -98,21 +56,120 @@ public class AddDebtTests
         });
     }
 
+
+    [Fact]
+    public void AddShouldRegisterAnotherDebtOnExistingDebtor100()
+    {
+        List<Debt> existingDebts =
+        [
+            new("vincent", "dimitri", 30m),
+            new("claude", "francois", 50m)
+        ];
+        DebtRegister debtRegister = new(existingDebts);
+        this.inMemoryDebtRegister.Feed(debtRegister);
+
+        this.Verify(new Debt("vincent", "dimitri", 120.0m), debtRegister.ToSnapshot() with
+        {
+            Debts =
+            [
+                new DebtSnapshot("claude", "francois", 50m),
+                new DebtSnapshot("vincent", "dimitri", 150m),
+            ]
+        });
+    }
+
+
+    [Fact]
+    public void AddShouldRegisterAnotherDebtOnExistingDebtor1()
+    {
+        List<Debt> existingDebts = [new("vincent", "dimitri", 30m)];
+        DebtRegister debtRegister = new(existingDebts);
+        this.inMemoryDebtRegister.Feed(debtRegister);
+
+        this.Verify(new Debt("dimitri", "vincent", 55.0m), debtRegister.ToSnapshot() with
+        {
+            Debts =
+            [
+                new DebtSnapshot("dimitri", "vincent", 25m)
+            ]
+        });
+    }
+
+    [Fact]
+    public void AddShouldRegisterAnotherDebtOnExistingDebtor2()
+    {
+        List<Debt> existingDebts = [new("vincent", "dimitri", 130m)];
+        DebtRegister debtRegister = new(existingDebts);
+        this.inMemoryDebtRegister.Feed(debtRegister);
+
+        this.Verify(new Debt("dimitri", "vincent", 55.0m), debtRegister.ToSnapshot() with
+        {
+            Debts =
+            [
+                new DebtSnapshot("vincent", "dimitri", 75m)
+            ]
+        });
+    }
+
+    [Fact]
+    public void AddShouldRegisterAnotherDebtOnExistingDebtor3()
+    {
+        List<Debt> existingDebts =
+        [
+            new("vincent", "dimitri", 130m),
+            new("claude", "hervé", 10m)
+        ];
+        DebtRegister debtRegister = new(existingDebts);
+        this.inMemoryDebtRegister.Feed(debtRegister);
+
+        this.Verify(new Debt("dimitri", "vincent", 55.0m), debtRegister.ToSnapshot() with
+        {
+            Debts =
+            [
+                new DebtSnapshot("claude", "hervé", 10m),
+                new DebtSnapshot("vincent", "dimitri", 75m),
+            ]
+        });
+    }
+
+    [Fact]
+    public void AddShouldRegisterAnotherDebtOnExistingDebtor4()
+    {
+        List<Debt> existingDebts =
+        [
+            new("vincent", "dimitri", 130m),
+            new("vincent", "hervé", 10m),
+            new("dimitri", "cladue", 20m)
+        ];
+        DebtRegister debtRegister = new(existingDebts);
+        this.inMemoryDebtRegister.Feed(debtRegister);
+
+        this.Verify(new Debt("dimitri", "vincent", 130.0m), debtRegister.ToSnapshot() with
+        {
+            Debts =
+            [
+                new DebtSnapshot("vincent", "hervé", 10m),
+                new DebtSnapshot("dimitri", "cladue", 20m)
+            ]
+        });
+    }
+
+
     [Theory]
     [InlineRandomData(0)]
     [InlineRandomData(-10)]
     public void AddShouldIgnoreDebtWhenAmountIsInvalid(int amount, Debt debt, DebtRegisterSnapshot debtRegister)
     {
-        Feed(debtRegister);
+        this.Feed(debtRegister);
 
-        Verify(debt with { Amount = amount }, debtRegister);
+        this.Verify(debt with { Amount = amount }, debtRegister);
     }
 
     [Theory]
     [RandomData]
     public void AddShouldFailWhenDebtorInvalid(Debt debt, DebtRegisterSnapshot debtRegister)
     {
-        Feed(debtRegister);
+        this.Feed(debtRegister);
 
         this.Invoking(s => s.Verify(debt with { Debtor = string.Empty }, debtRegister)).Should()
             .Throw<InvalidNameException>();
@@ -122,7 +179,7 @@ public class AddDebtTests
     [RandomData]
     public void AddShouldFailWhenCreditorIsInvalid(Debt debt, DebtRegisterSnapshot debtRegister)
     {
-        Feed(debtRegister);
+        this.Feed(debtRegister);
 
         this.Invoking(s => s.Verify(debt with { Creditor = string.Empty }, debtRegister)).Should()
             .Throw<InvalidNameException>();
@@ -133,7 +190,7 @@ public class AddDebtTests
     public void AddShouldFailWhenDebtorNameEqualsCreditorName(string someone, Debt debt,
         DebtRegisterSnapshot debtRegister)
     {
-        Feed(debtRegister);
+        this.Feed(debtRegister);
 
         this.Invoking(s => s.Verify(debt with { Debtor = someone, Creditor = someone }, debtRegister)).Should()
             .Throw<InvalidNameException>();
@@ -141,15 +198,15 @@ public class AddDebtTests
 
     private void Feed(DebtRegisterSnapshot debtRegister)
     {
-        inMemoryDebtRegister.Feed(debtRegister);
+        this.inMemoryDebtRegister.Feed(debtRegister);
     }
 
     private void Verify(Debt debt, DebtRegisterSnapshot expected)
     {
-        sut.Add(debt);
+        this.sut.Add(debt);
 
-        DebtRegister actual = inMemoryDebtRegister.Get();
+        DebtRegister actual = this.inMemoryDebtRegister.Get();
 
-        actual.ToSnapshot().Should().BeEquivalentTo(expected);
+        actual.ToSnapshot().Should().BeEquivalentTo(expected, o => o.WithStrictOrdering());
     }
 }

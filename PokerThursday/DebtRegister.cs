@@ -6,17 +6,10 @@ public record DebtRegisterSnapshot(List<DebtSnapshot> Debts);
 
 public class DebtRegister(List<Debt> existingDebts)
 {
-    private List<Debt> existingDebts = existingDebts;
+    public DebtRegisterSnapshot ToSnapshot() => new(existingDebts.Select(d => d.ToSnapshot()).ToList());
 
-    public DebtRegisterSnapshot ToSnapshot()
-    {
-        return new DebtRegisterSnapshot(existingDebts.Select(d => d.ToSnapshot()).ToList());
-    }
-
-    public static DebtRegister From(DebtRegisterSnapshot snapshot)
-    {
-        return new DebtRegister(snapshot.Debts.Select(d => new Debt(d.Debtor, d.Creditor, d.Amount)).ToList());
-    }
+    public static DebtRegister From(DebtRegisterSnapshot snapshot) =>
+        new(snapshot.Debts.Select(d => new Debt(d.Debtor, d.Creditor, d.Amount)).ToList());
 
     public void Act(Debt debt)
     {
@@ -25,16 +18,29 @@ public class DebtRegister(List<Debt> existingDebts)
         if (ShouldIgnore(debt))
             return;
 
-        decimal totalAmount = debt.Amount;
+        Debt? creditorExistingDebt =
+            existingDebts.SingleOrDefault(x =>
+                (x.Debtor == debt.Creditor && x.Creditor == debt.Debtor)
+                ||
+                (x.Debtor == debt.Debtor && x.Creditor == debt.Creditor));
 
-        List<Debt> toto = [];
-        foreach (Debt item in existingDebts)
-            if (item.Debtor != debt.Debtor || item.Creditor != debt.Creditor)
-                toto.Add(item);
+        if (creditorExistingDebt is not null)
+        {
+            existingDebts.Remove(creditorExistingDebt);
+
+            if (creditorExistingDebt.Debtor == debt.Debtor)
+                debt = debt with { Amount = debt.Amount + creditorExistingDebt.Amount };
             else
-                totalAmount += item.Amount;
+            {
+                if (debt.Amount > creditorExistingDebt.Amount)
+                    debt = new Debt(debt.Debtor, debt.Creditor, debt.Amount - creditorExistingDebt.Amount);
+                else if (debt.Amount < creditorExistingDebt.Amount)
+                    debt = new Debt(debt.Creditor, debt.Debtor, creditorExistingDebt.Amount - debt.Amount);
+                else return;
+            }
+        }
 
-        existingDebts = toto.Concat([new Debt(debt.Debtor, debt.Creditor, totalAmount)]).ToList();
+        existingDebts.Add(debt);
     }
 
     public void Pay(Debt debt)

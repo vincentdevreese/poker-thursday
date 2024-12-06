@@ -61,13 +61,13 @@
 
     protected override void OnInitialized()
     {
-        editContextDebtToAdd = new(DebtToAdd);
+        editContextDebtToAdd = new EditContext(DebtToAdd);
         vmsDebtToAdd = new ValidationMessageStore(editContextDebtToAdd);
-        editContextDebtToAdd.OnFieldChanged += (f, j) => vmsDebtToAdd.Clear();
+        editContextDebtToAdd.OnFieldChanged += (_, _) => vmsDebtToAdd.Clear();
 
-        editContextDebtToPay = new(DebtToPay);
+        editContextDebtToPay = new EditContext(DebtToPay);
         vmsDebtToPay = new ValidationMessageStore(editContextDebtToPay);
-        editContextDebtToPay.OnFieldChanged += (f, j) => vmsDebtToPay.Clear();
+        editContextDebtToPay.OnFieldChanged += (_, _) => vmsDebtToPay.Clear();
     }
 
     private void Add()
@@ -92,7 +92,7 @@
         {
             vmsDebtToPay!.Add(() => DebtToPay.Debtor, "Creditor and debitor must be different");
         }
-        catch (PayDebtAmountOverException ex)
+        catch (PayDebtAmountOverException)
         {
             vmsDebtToPay!.Add(() => DebtToPay.Amount, "Your amount exceeds your debt");
         }
