@@ -25,7 +25,6 @@ public class Suggest
 
         List<Debt> newDebts = [];
         foreach (Debt debt in debts)
-        {
             if (debt == debt1)
             {
                 if (debt1.Amount > debt2.Amount)
@@ -41,8 +40,9 @@ public class Suggest
                     newDebts.Add(debt with { Amount = debt2.Amount - debt1.Amount });
             }
             else
+            {
                 newDebts.Add(debt);
-        }
+            }
 
         return [.. newDebts.Where(d => d.Amount != 0)];
     }
@@ -52,9 +52,11 @@ public class Suggest
         IEnumerable<(Debt d1, Debt d2)> candidates =
             from d1 in debts
             from d2 in debts
-            where d1.Debtor == d2.Creditor || d1.Creditor == d2.Debtor
+            where d1.Creditor == d2.Debtor
             select (d1, d2);
 
-        return candidates.FirstOrDefault();
+        if (!candidates.Any()) return null;
+
+        return candidates.ToArray()[0];
     }
 }

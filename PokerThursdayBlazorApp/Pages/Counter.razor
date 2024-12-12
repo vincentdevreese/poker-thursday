@@ -11,42 +11,63 @@
 
 <table class="table table-active table-bordered table-light table-striped">
     <thead>
-        <tr>
-            <th>Debtor</th>
-            <th>Creditor</th>
-            <th>Amount</th>
-        </tr>
+    <tr>
+        <th>Debtor</th>
+        <th>Creditor</th>
+        <th>Amount</th>
+    </tr>
     </thead>
     <tbody>
-        @foreach (DebtSnapshot debt in @Repo.Get().ToSnapshot().Debts)
-        {
-            <tr>
-                <td>@debt.Debtor</td>
-                <td>@debt.Creditor</td>
-                <td>@debt.Amount</td>
-            </tr>
-        }
+    @foreach (DebtSnapshot debt in Repo.Get().ToSnapshot().Debts)
+    {
+        <tr>
+            <td>@debt.Debtor</td>
+            <td>@debt.Creditor</td>
+            <td>@debt.Amount</td>
+        </tr>
+    }
     </tbody>
 </table>
 
+<table class="table table-active table-bordered table-light table-striped">
+    <thead>
+    <tr>
+        <th>Debtor</th>
+        <th>Creditor</th>
+        <th>Amount</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (Debt debt in new Suggest().Do(Repo.Get().ExistingDebts.ToArray()))
+    {
+        <tr>
+            <td>@debt.Debtor</td>
+            <td>@debt.Creditor</td>
+            <td>@debt.Amount</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+
 <EditForm EditContext="editContextDebtToAdd" OnValidSubmit="Add" FormName="form-add-debt">
-    <DataAnnotationsValidator />
+    <DataAnnotationsValidator/>
     <InputText @bind-Value="DebtToAdd.Debtor"></InputText>
     <InputText @bind-Value="DebtToAdd.Creditor"></InputText>
     <InputNumber @bind-Value="DebtToAdd.Amount"></InputNumber>
     <button type="submit" class="btn btn-primary">Add</button>
-    <ValidationSummary />
+    <ValidationSummary/>
 </EditForm>
 
-<hr />
+<hr/>
 
 <EditForm EditContext="editContextDebtToPay" OnValidSubmit="Pay" FormName="form-pay-debt">
-    <DataAnnotationsValidator />
+    <DataAnnotationsValidator/>
     <InputText @bind-Value="DebtToPay.Debtor"></InputText>
     <InputText @bind-Value="DebtToPay.Creditor"></InputText>
     <InputNumber @bind-Value="DebtToPay.Amount"></InputNumber>
     <button type="submit" class="btn btn-primary">Pay</button>
-    <ValidationSummary />
+    <ValidationSummary/>
 </EditForm>
 
 @code {
@@ -105,10 +126,11 @@
         [Range(1, 1000)] public decimal Amount { get; set; }
     }
 
-        public class DebtToPayModel
+    public class DebtToPayModel
     {
         [Required] public string Debtor { get; set; }
         [Required] public string Creditor { get; set; }
         [Range(1, 1000)] public decimal Amount { get; set; }
     }
+
 }

@@ -6,7 +6,9 @@ public record DebtRegisterSnapshot(List<DebtSnapshot> Debts);
 
 public class DebtRegister(List<Debt> existingDebts)
 {
-    public DebtRegisterSnapshot ToSnapshot() => new(existingDebts.Select(d => d.ToSnapshot()).ToList());
+    public  readonly List<Debt> ExistingDebts = existingDebts;
+    
+    public DebtRegisterSnapshot ToSnapshot() => new(ExistingDebts.Select(d => d.ToSnapshot()).ToList());
 
     public static DebtRegister From(DebtRegisterSnapshot snapshot) =>
         new(snapshot.Debts.Select(d => new Debt(d.Debtor, d.Creditor, d.Amount)).ToList());
@@ -19,14 +21,14 @@ public class DebtRegister(List<Debt> existingDebts)
             return;
 
         Debt? creditorExistingDebt =
-            existingDebts.SingleOrDefault(x =>
+            ExistingDebts.SingleOrDefault(x =>
                 (x.Debtor == debt.Creditor && x.Creditor == debt.Debtor)
                 ||
                 (x.Debtor == debt.Debtor && x.Creditor == debt.Creditor));
 
         if (creditorExistingDebt is not null)
         {
-            existingDebts.Remove(creditorExistingDebt);
+            ExistingDebts.Remove(creditorExistingDebt);
 
             if (creditorExistingDebt.Debtor == debt.Debtor)
                 debt = debt with { Amount = debt.Amount + creditorExistingDebt.Amount };
@@ -40,7 +42,7 @@ public class DebtRegister(List<Debt> existingDebts)
             }
         }
 
-        existingDebts.Add(debt);
+        ExistingDebts.Add(debt);
     }
 
     public void Pay(Debt debt)
@@ -50,18 +52,18 @@ public class DebtRegister(List<Debt> existingDebts)
         if (ShouldIgnore(debt))
             return;
 
-        Debt? found = existingDebts.SingleOrDefault(x => x.Debtor == debt.Debtor && x.Creditor == debt.Creditor);
+        Debt? found = ExistingDebts.SingleOrDefault(x => x.Debtor == debt.Debtor && x.Creditor == debt.Creditor);
 
         if (found is null) return;
 
         if (found.Amount - debt.Amount < 0)
             throw new PayDebtAmountOverException();
 
-        existingDebts.Remove(found);
+        ExistingDebts.Remove(found);
         if (found.Amount - debt.Amount == 0) return;
 
         found = found with { Amount = found.Amount - debt.Amount };
-        existingDebts.Add(found);
+        ExistingDebts.Add(found);
     }
 
     private static void EnsureIsValid(Debt debt)
