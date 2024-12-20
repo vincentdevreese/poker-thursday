@@ -5,16 +5,14 @@
 @inject AddDebt AddDebt
 @inject PayDebt PayDebt
 
-<PageTitle>Debt Register</PageTitle>
-
-<h1>Debt Register</h1>
+<PageTitle>Poker thursday: Registre des dettes</PageTitle>
 
 <table class="table table-active table-bordered table-light table-striped">
     <thead>
     <tr>
-        <th>Debtor</th>
-        <th>Creditor</th>
-        <th>Amount</th>
+        <th>Débiteur</th>
+        <th>Créditeur</th>
+        <th>Montant</th>
     </tr>
     </thead>
     <tbody>
@@ -23,7 +21,7 @@
         <tr>
             <td>@debt.Debtor</td>
             <td>@debt.Creditor</td>
-            <td>@debt.Amount</td>
+            <td>@debt.Amount €</td>
         </tr>
     }
     </tbody>
@@ -32,9 +30,9 @@
 <table class="table table-active table-bordered table-light table-striped">
     <thead>
     <tr>
-        <th>Debtor</th>
-        <th>Creditor</th>
-        <th>Amount</th>
+        <th>Débiteur</th>
+        <th>Créditeur</th>
+        <th>Montant</th>
     </tr>
     </thead>
     <tbody>
@@ -43,7 +41,7 @@
         <tr>
             <td>@debt.Debtor</td>
             <td>@debt.Creditor</td>
-            <td>@debt.Amount</td>
+            <td>@debt.Amount €</td>
         </tr>
     }
     </tbody>
@@ -52,8 +50,11 @@
 
 <EditForm EditContext="editContextDebtToAdd" OnValidSubmit="Add" FormName="form-add-debt">
     <DataAnnotationsValidator/>
+    <label>Débiteur</label>
     <InputText @bind-Value="DebtToAdd.Debtor"></InputText>
+    <label>Créditeur</label>
     <InputText @bind-Value="DebtToAdd.Creditor"></InputText>
+    <label>Montant</label>
     <InputNumber @bind-Value="DebtToAdd.Amount"></InputNumber>
     <button type="submit" class="btn btn-primary">Add</button>
     <ValidationSummary/>
@@ -63,8 +64,11 @@
 
 <EditForm EditContext="editContextDebtToPay" OnValidSubmit="Pay" FormName="form-pay-debt">
     <DataAnnotationsValidator/>
+    <label>Débiteur</label>
     <InputText @bind-Value="DebtToPay.Debtor"></InputText>
+    <label>Créditeur</label>
     <InputText @bind-Value="DebtToPay.Creditor"></InputText>
+    <label>Montant</label>
     <InputNumber @bind-Value="DebtToPay.Amount"></InputNumber>
     <button type="submit" class="btn btn-primary">Pay</button>
     <ValidationSummary/>
