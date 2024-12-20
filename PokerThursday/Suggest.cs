@@ -23,28 +23,33 @@ public class Suggest
         Debt debt1 = result.Value.Creditor;
         Debt debt2 = result.Value.Debtor;
 
-        List<Debt> newDebts = [];
-        foreach (Debt debt in debts)
-            if (debt == debt1)
-            {
-                if (debt1.Amount > debt2.Amount)
-                    newDebts.Add(debt with { Amount = debt1.Amount - debt2.Amount });
-                else
-                    newDebts.Add(debt with { Creditor = debt2.Creditor });
-            }
-            else if (debt == debt2)
-            {
-                if (debt1.Amount > debt2.Amount)
-                    newDebts.Add(debt with { Debtor = debt1.Debtor });
-                else
-                    newDebts.Add(debt with { Amount = debt2.Amount - debt1.Amount });
-            }
-            else
-            {
-                newDebts.Add(debt);
-            }
+        List<Debt> newDebts = debts.Except([debt1, debt2]).ToList();
+
+        newDebts.Add(OptimizeFirstDebt(debt1, debt2));
+
+        newDebts.Add(OptimizeSecondDebt(debt1, debt2));
 
         return [.. newDebts.Where(d => d.Amount != 0)];
+    }
+
+    private static Debt OptimizeSecondDebt(Debt debt1, Debt debt2)
+    {
+        if (debt1.Amount > debt2.Amount)
+        {
+            return debt2 with { Debtor = debt1.Debtor };
+        }
+
+        return debt2 with { Amount = debt2.Amount - debt1.Amount };
+    }
+
+    private static Debt OptimizeFirstDebt(Debt debt1, Debt debt2)
+    {
+        if (debt1.Amount > debt2.Amount)
+        {
+            return debt1 with { Amount = debt1.Amount - debt2.Amount };
+        }
+
+        return debt1 with { Creditor = debt2.Creditor };
     }
 
     private static (Debt Creditor, Debt Debtor)? FindCandidate(Debt[] debts)
