@@ -1,6 +1,6 @@
 using FluentAssertions;
-
 using PokerThursday;
+using PokerThursdayTest.AutoFixture;
 
 namespace PokerThursdayTest;
 
@@ -8,21 +8,36 @@ public class SuggestTests
 {
     private readonly Suggest sut = new();
 
-    private static Debt ADebtFrom(int amount) =>
-        Randomizer.Any<Debt>() with { Amount = amount };
-
-    [Fact]
-    public void Should_test_name()
+    private static Debt ADebtFrom(int amount)
     {
-        Debt[] a = [];
-        this.Verify(a, a);
+        return Randomizer.Any<Debt>() with { Amount = amount };
+    }
+
+    private static Debt ADebt(string debtor, string creditor)
+    {
+        return Randomizer.Any<Debt>() with { Debtor = debtor, Creditor = creditor };
     }
 
     [Fact]
-    public void Should_test_name_2()
+    public void Should_DoNothing_WhenDebtRegisterIsEmpty()
     {
-        Debt[] a = [ADebtFrom(1)];
-        this.Verify(a, a);
+        Verify([], []);
+    }
+
+    [Theory]
+    [RandomData]
+    public void Should_DoNothing_WhenDebtRegisterHasOnlyOneDebt(Debt theSingleDebt)
+    {
+        Verify([theSingleDebt], [theSingleDebt]);
+    }
+
+    [Fact]
+    public void Should_DoNothing_WhenNoDebtorIsAlsoCreditor()
+    {
+        Debt debt1 = ADebt("a", "b");
+        Debt debt2 = ADebt("c", "d");
+
+        Verify([debt1, debt2], [debt1, debt2]);
     }
 
     [Fact]
@@ -31,27 +46,7 @@ public class SuggestTests
         Debt debt1 = new("a", "b", 20);
         Debt debt2 = new("b", "c", 20);
 
-        this.Verify([debt1, debt2], [new Debt("a", "c", 20)]);
-    }
-
-
-    [Fact]
-    public void Should_test_name_4()
-    {
-        Debt debt1 = new("a", "b", 20);
-        Debt debt2 = new("a", "c", 20);
-
-        this.Verify([debt1, debt2], [debt1, debt2]);
-    }
-
-    [Fact]
-    public void Should_test_name_5()
-    {
-        Debt debt1 = new("a", "b", 20);
-        Debt debt2 = new("c", "d", 20);
-        Debt debt3 = new("e", "f", 20);
-
-        this.Verify([debt1, debt2, debt3], [debt1, debt2, debt3]);
+        Verify([debt1, debt2], [new Debt("a", "c", 20)]);
     }
 
     [Fact]
@@ -60,7 +55,7 @@ public class SuggestTests
         Debt debt1 = new("a", "b", 20);
         Debt debt2 = new("b", "c", 10);
 
-        this.Verify(
+        Verify(
             [debt1, debt2],
             [
                 new Debt("a", "b", 10),
@@ -75,7 +70,7 @@ public class SuggestTests
         Debt debt1 = new("a", "b", 20);
         Debt debt2 = new("b", "c", 30);
 
-        this.Verify(
+        Verify(
             [debt1, debt2],
             [
                 new Debt("a", "c", 20),
@@ -91,12 +86,12 @@ public class SuggestTests
         Debt debt2 = new("b", "c", 30);
         Debt debt3 = new("d", "e", 30);
 
-        this.Verify(
+        Verify(
             [debt1, debt2, debt3],
             [
                 new Debt("a", "c", 20),
                 new Debt("b", "c", 10),
-                new Debt("d", "e", 30),
+                new Debt("d", "e", 30)
             ]
         );
     }
@@ -104,7 +99,7 @@ public class SuggestTests
     [Fact]
     public void Should_test_name_9()
     {
-        this.Verify(
+        Verify(
             [
                 new Debt("a", "b", 20),
                 new Debt("e", "f", 30),
@@ -118,14 +113,14 @@ public class SuggestTests
                 new Debt("e", "f", 30),
                 new Debt("g", "z", 30),
                 new Debt("a", "d", 20),
-                new Debt("b", "d", 10),
+                new Debt("b", "d", 10)
             ]
         );
     }
 
     private void Verify(Debt[] register, Debt[] expected)
     {
-        Debt[] actual = this.sut.Do(register);
+        Debt[] actual = sut.Do(register);
         actual.Should().BeEquivalentTo(expected, o => o.WithoutStrictOrdering());
     }
 }
